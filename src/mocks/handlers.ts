@@ -16,9 +16,9 @@ import type {
 // -----------------------------
 // メモリ DB
 // -----------------------------
-let games: Record<string, GameState> = {};
-let slideJobs: Record<string, SlideJobResponse> = {};
-let plotJobs: Record<string, PlotJobResponse> = {};
+const games: Record<string, GameState> = {};
+const slideJobs: Record<string, SlideJobResponse> = {};
+const plotJobs: Record<string, PlotJobResponse> = {};
 
 // -----------------------------
 // ID generator
@@ -62,14 +62,14 @@ export const handlers = [
   }),
 
   // GET /games/:gameId
-  http.get<never, GameState>("/games/:gameId", async ({ params }) => {
+  http.get<never, GameState>("/games/:gameId", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
     return HttpResponse.json(game, { status: 200 });
   }),
 
   // PATCH /games/:gameId
-  http.patch<PatchGameRequest, GameState>("/games/:gameId", async ({ request, params }) => {
+  http.patch<{ gameId: string }, GameState>("/games/:gameId", async ({ request, params }: { request: Request; params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
     const body = await request.json() as PatchGameRequest;
@@ -79,7 +79,7 @@ export const handlers = [
   }),
 
   // POST /games/:gameId/turn/advance
-  http.post<never, GameState>("/games/:gameId/turn/advance", async ({ params }) => {
+  http.post<never, GameState>("/games/:gameId/turn/advance", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
@@ -96,7 +96,7 @@ export const handlers = [
   }),
 
   // POST /games/:gameId/capture
-  http.post<never, GameState>("/games/:gameId/capture", async ({ params }) => {
+  http.post<never, GameState>("/games/:gameId/capture", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
@@ -110,7 +110,7 @@ export const handlers = [
   }),
 
   // POST /games/:gameId/ai/analyze
-  http.post<never, GameState>("/games/:gameId/ai/analyze", async ({ params }) => {
+  http.post<never, GameState>("/games/:gameId/ai/analyze", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
@@ -128,7 +128,7 @@ export const handlers = [
   }),
 
   // POST /games/:gameId/ai/next
-  http.post<never, GameState>("/games/:gameId/ai/next", async ({ params }) => {
+  http.post<never, GameState>("/games/:gameId/ai/next", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
@@ -146,13 +146,13 @@ export const handlers = [
   }),
 
   // POST /games/:gameId/ai/hint
-  http.post<HintRequest, HintResponse>("/games/:gameId/ai/hint", async ({ request }) => {
-    const { word } = await request.json() as HintRequest;
+  http.post<{ gameId: string }, HintResponse>("/games/:gameId/ai/hint", async ({ request }) => {
+    const { word } = await request.json() as unknown as HintRequest;
     return HttpResponse.json({ hint: `ヒント: ${word} に関するヒントです` }, { status: 200 });
   }),
 
   // POST /games/:gameId/slide
-  http.post<SlideRequest, SlideJobResponse>("/games/:gameId/slide", async ({ request, params }) => {
+  http.post<{ gameId: string }, SlideJobResponse>("/games/:gameId/slide", async ({ request, params }: { request: Request; params: { gameId: string } }) => {
     const { length } = await request.json() as SlideRequest;
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
@@ -165,15 +165,15 @@ export const handlers = [
   }),
 
   // GET /games/:gameId/slide/:jobId
-  http.get<never, SlideJobResponse>("/games/:gameId/slide/:jobId", async ({ params }) => {
+  http.get<never, SlideJobResponse>("/games/:gameId/slide/:jobId", async ({ params }: { params: { gameId: string; jobId: string } }) => {
     const job = slideJobs[params.jobId];
     if (!job) return HttpResponse.json({ message: "Not found" }, { status: 404 });
     return HttpResponse.json(job, { status: 200 });
   }),
 
   // POST /games/:gameId/ai/plot
-  http.post<PlotRequest, PlotJobResponse>("/games/:gameId/ai/plot", async ({ request, params }) => {
-    const { word } = await request.json() as PlotRequest;
+  http.post<{ gameId: string }, PlotJobResponse>("/games/:gameId/ai/plot", async ({ request, params }: { request: Request; params: { gameId: string } }) => {
+    await request.json() as PlotRequest; // リクエストボディの検証
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
@@ -185,14 +185,14 @@ export const handlers = [
   }),
 
   // GET /games/:gameId/ai/plot/:jobId
-  http.get<never, PlotJobResponse>("/games/:gameId/ai/plot/:jobId", async ({ params }) => {
+  http.get<never, PlotJobResponse>("/games/:gameId/ai/plot/:jobId", async ({ params }: { params: { gameId: string; jobId: string } }) => {
     const job = plotJobs[params.jobId];
     if (!job) return HttpResponse.json({ message: "Not found" }, { status: 404 });
     return HttpResponse.json(job, { status: 200 });
   }),
 
   // POST /games/:gameId/end
-  http.post<never, GameState>("/games/:gameId/end", async ({ params }) => {
+  http.post<never, GameState>("/games/:gameId/end", async ({ params }: { params: { gameId: string } }) => {
     const game = games[params.gameId];
     if (!game) return HttpResponse.json({ message: "Not found" }, { status: 404 });
 
